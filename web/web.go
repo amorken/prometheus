@@ -352,6 +352,7 @@ func serveDebug(w http.ResponseWriter, req *http.Request) {
 
 func (h *Handler) serveStaticAsset(w http.ResponseWriter, req *http.Request) {
 	fp := route.Param(req.Context(), "filepath")
+	fileExt := filepath.Ext(fp)
 	fp = filepath.Join("web/ui/static", fp)
 
 	info, err := ui.AssetInfo(fp)
@@ -367,6 +368,13 @@ func (h *Handler) serveStaticAsset(w http.ResponseWriter, req *http.Request) {
 		}
 		w.WriteHeader(http.StatusNotFound)
 		return
+	}
+
+	switch fileExt {
+	case "js":
+		w.Header().Set("Content-Type", "application/javascript")
+	case "css":
+		w.Header().Set("Content-Type", "text/css")
 	}
 
 	http.ServeContent(w, req, info.Name(), info.ModTime(), bytes.NewReader(file))
